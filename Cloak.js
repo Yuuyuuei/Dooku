@@ -110,11 +110,11 @@ Bar.AddBehaviour(new LitRoom()).LightsOn = () => {
 // TestLamp.AddBehaviour(new LightSource()).TurnOn();
 // TestLamp.MoveInto(Bar);
 
-Dooku.Start(() => {
-    var input = $('#input-container');
-    var output = $('#output-container');
-    Dooku.IO.Attach(input, output);
+var input = $('#input-container');
+var output = $('#output-container');
+Dooku.IO.Attach(input, output);
 
+Dooku.Start(() => {
     // Possess the player
     Actor.Possess(Player);
 

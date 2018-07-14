@@ -1,19 +1,6 @@
 'use strict';
 
-const Vocabulary = {
-    tags: {
-        Direction: {
-            isA: "Noun"
-        }
-    },
-    words: {
-        "North": "Direction",
-        "South": "Direction",
-        "East": "Direction",
-        "West": "Direction"
-    }
-}
-nlp.plugin(Vocabulary);
+const NLP = new Bravey.Nlp.Fuzzy();
 
 const GameInfo = {
     Name: ``,
@@ -79,43 +66,24 @@ const Dooku = {
         Parse: function (value) {
             // split ands
             let arrValue = value.split("and");
-            for(var i in arrValue) {
-                let doc = nlp(arrValue[i]);
-                for(var j in DeepVerb.List) {
-                    let verb = DeepVerb.List[j];
-                    for (var k in verb.Verb) {
-                        let match = doc.match(verb.Verb[k]);
-                        if (match.found) {
-                            if (verb.Verb[k].split(" ").length === arrValue[i].split(" ").length) {
-                                verb.Action(Actor.Me(), doc);
-                                return;
+
+            for (var i in arrValue) {
+                // Parse
+                var out = NLP.test(arrValue[i]);
+                if (out) {
+                    if (DeepVerb.IsVocab(out.intent)) {
+                        var vocab = DeepVerb.GetVocab(out.intent);
+                        var result = true;
+                        if (Actor.Me())
+                            if (Actor.Me().Location) {
+                                result = Actor.Me().Location.CheckVerb(vocab, out);
                             }
-                        }
+
+                        if (result)
+                            vocab.Action(Actor.Me(), out);
                     }
                 }
-
-                Dooku.IO.Append(
-                    `<p>I don't know what you mean</p>`
-                )
             }
-
-            // for (var i in arrValue) {
-            //     // Parse
-            //     var out = NLP.test(arrValue[i]);
-            //     if (out) {
-            //         if (DeepVerb.IsVocab(out.intent)) {
-            //             var vocab = DeepVerb.GetVocab(out.intent);
-            //             var result = true;
-            //             if (Actor.Me())
-            //                 if (Actor.Me().Location) {
-            //                     result = Actor.Me().Location.CheckVerb(vocab, out);
-            //                 }
-
-            //             if (result)
-            //                 vocab.Action(Actor.Me(), out);
-            //         }
-            //     }
-            // }
         }
     },
     Setup: function () {
@@ -127,53 +95,58 @@ const Dooku = {
             $(this.IO.Input).find("input:first").val("");
         });
 
+        // Process all verbs
+        for(var i in DeepVerb.List) {
+            DeepVerb.List[i].Process();
+        }
+
         // Append NLP
-        // let directions = new Bravey.StringEntityRecognizer("direction");
-        // directions.addMatch("north", "north");
-        // directions.addMatch("north", "n");
-        // directions.addMatch("south", "south");
-        // directions.addMatch("south", "s");
-        // directions.addMatch("east", "east");
-        // directions.addMatch("east", "e");
-        // directions.addMatch("west", "west");
-        // directions.addMatch("west", "w");
-        // NLP.addEntity(directions);
+        let directions = new Bravey.StringEntityRecognizer("direction");
+        directions.addMatch("north", "north");
+        directions.addMatch("north", "n");
+        directions.addMatch("south", "south");
+        directions.addMatch("south", "s");
+        directions.addMatch("east", "east");
+        directions.addMatch("east", "e");
+        directions.addMatch("west", "west");
+        directions.addMatch("west", "w");
+        NLP.addEntity(directions);
 
-        // let things = new Bravey.StringEntityRecognizer("thing");
-        // for (var i in Thing.List) {
-        //     var thing = Thing.List[i];
-        //     things.addMatch(thing, thing.Name)
-        //     for (var j in thing.Entities) {
-        //         things.addMatch(thing, thing.Entities[j])
-        //     }
-        // }
-        // NLP.addEntity(things);
+        let things = new Bravey.StringEntityRecognizer("thing");
+        for (var i in Thing.List) {
+            var thing = Thing.List[i];
+            things.addMatch(thing, thing.Name)
+            for (var j in thing.Entities) {
+                things.addMatch(thing, thing.Entities[j])
+            }
+        }
+        NLP.addEntity(things);
 
-        // let items = new Bravey.StringEntityRecognizer("item");
-        // for (var i in Item.List) {
-        //     var item = Item.List[i];
-        //     items.addMatch(item, item.Name)
-        //     for (var j in item.Entities) {
-        //         items.addMatch(item, item.Entities[j])
-        //     }
-        // }
-        // NLP.addEntity(items);
+        let items = new Bravey.StringEntityRecognizer("item");
+        for (var i in Item.List) {
+            var item = Item.List[i];
+            items.addMatch(item, item.Name)
+            for (var j in item.Entities) {
+                items.addMatch(item, item.Entities[j])
+            }
+        }
+        NLP.addEntity(items);
 
-        // let actors = new Bravey.StringEntityRecognizer("actor");
-        // for (var i in Actor.List) {
-        //     var actor = Actor.List[i];
-        //     actors.addMatch(actor, actor.Name)
-        //     for (var j in actor.Entities) {
-        //         actors.addMatch(actor, actor.Entities[j])
-        //     }
-        // }
-        // NLP.addEntity(actors);
+        let actors = new Bravey.StringEntityRecognizer("actor");
+        for (var i in Actor.List) {
+            var actor = Actor.List[i];
+            actors.addMatch(actor, actor.Name)
+            for (var j in actor.Entities) {
+                actors.addMatch(actor, actor.Entities[j])
+            }
+        }
+        NLP.addEntity(actors);
     },
     Start: function (main) {
+        this.Setup();
+
         // User main
         main();
-
-        this.Setup();
 
         // Backend start game
         if (Actor.CurrentPlayer)
@@ -226,7 +199,6 @@ class Thing {
         this.ADescription = null;
         this.TheDescription = null;
         this.Entities = []; // Vocab list
-        this.Noun = [];
         this.Contents = [];
         this.Behaviours = [];
         this.Location = null;
@@ -265,14 +237,6 @@ class Thing {
         }
 
         Thing.List.push(this);
-    }
-
-    AddNoun(noun) {
-        this.Noun.push(noun);
-    }
-
-    DelNoun(noun) {
-        this.Noun = this.Noun.filter(item => item !== noun)
     }
 
     GetName() {
@@ -461,39 +425,28 @@ Actor.List = []
 
 class DeepVerb {
     // constructor(vocab) {
-    constructor() {
-        // this.Action = (actor, out) => {};
-        // this.Vocab = vocab || {};
-
-        // this.Process();
-        this.Verb = [];
+    constructor(vocab) {
+        this.Action = (actor, out) => {};
+        this.Vocab = {};
 
         DeepVerb.List.push(this);
     }
 
-    AddVerb(verb) {
-        this.Verb.push(verb);
-    }
-
-    DelVerb(verb) {
-        this.Verb = this.Verb.filter(item => item !== verb)
-    }
-
     // Process the verb
-    // Process() {
-    //     for (var a in this.Vocab) {
-    //         NLP.addIntent(a, this.Vocab[a].entities);
-    //         for (var c in this.Vocab[a].documents) {
-    //             NLP.addDocument(this.Vocab[a].documents[c], a);
-    //         }
-    //     }
-    // }
+    Process() {
+        for (var a in this.Vocab) {
+            NLP.addIntent(a, this.Vocab[a].entities);
+            for (var c in this.Vocab[a].documents) {
+                NLP.addDocument(this.Vocab[a].documents[c], a);
+            }
+        }
+    }
 
-    // static IsVocab(key) {
-    //     return DeepVerb.List.some(verb => key in verb.Vocab);
-    // }
-    // static GetVocab(key) {
-    //     return DeepVerb.List.filter(verb => key in verb.Vocab)[0];
-    // }
+    static IsVocab(key) {
+        return DeepVerb.List.some(verb => key in verb.Vocab);
+    }
+    static GetVocab(key) {
+        return DeepVerb.List.filter(verb => key in verb.Vocab)[0];
+    }
 }
 DeepVerb.List = [];
