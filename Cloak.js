@@ -12,14 +12,14 @@ Global.Set("MaxScore", 2);
 
 const Player = new Actor();
 Player.Name = "You";
-Player.Entities = ["me", "you", "myself"];
+Player.Noun = ["me", "you", "myself"];
 Player.ADescription = "yourself";
 Player.TheDescription = "yourself";
 Player.Description = "You look the same as always. ";
 
 const Cloak = new Item();
 Cloak.Name = "velvet cloak";
-Cloak.Entities = ["cloak"];
+Cloak.Noun = ["cloak"];
 Cloak.ADescription = `a ${Cloak.Name}`;
 Cloak.TheDescription = `the ${Cloak.Name}`;
 Cloak.Description = "A handsome cloak, of velvet trimmed with satin, and slightly spattered with raindrops. Its blackness is so deep that it almost seems to suck light from the room.";
@@ -60,7 +60,7 @@ Cloakroom.East = () => {
 
 const Hook = new Item();
 Hook.Name = "small brass hook";
-Hook.Entities = ["hook"];
+Hook.Noun = ["hook"];
 Hook.Description = () => {
     return `It's just a small brass hook, ${Cloak.IsIn(Hook) ? `with a cloak hanging on it. ` : `screwed to the wall. `}`;
 }
@@ -71,29 +71,7 @@ const Bar = new Room();
 Bar.Name = "Foyer Bar";
 Bar.Description = "The bar, much rougher than you'd have guessed after the opulence of the foyer to the north, is completely empty. There seems to be some sort of message scrawled in the sawdust on the floor."
 Bar.CheckVerb = (vocab, out) => {
-    if (!Bar.GetBehaviour("LitRoom").IsLit()) {
-        if (out.intent === "go_direction") {
-            if (out.entitiesIndex.direction.value != "north") {
-                Dooku.IO.Append(
-                    `<p>Blundering around in the dark isn't a good idea!</p>`
-                );
-                return false;
-            }
-        }
-        // TODO: Make sure it is NOT system verb like SAVE or LOAD
-        else if (true) {
-            if (out.intent === "look_around") {
-                Dooku.IO.Append(
-                    `<p>Its too dark to look around!</p>`
-                );
-                return false;
-            }
-            Dooku.IO.Append(
-                `<p>In the dark? You could easily disturb something!</p>`
-            );
-            return false;
-        }
-    }
+
     return true;
 }
 Bar.North = () => {
