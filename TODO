@@ -1,2 +1,3 @@
-TODO: Examine works globally, nmust fix
-TODO: CheckVerb in room before parsing
+TODO: General DROP check that works on both Drop and DropOn
+TODO: Verbs: Wear, Unwear, Take, Inventory, Search
+TODO: OnAction callbacks

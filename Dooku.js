@@ -92,19 +92,46 @@ const Dooku = {
                     // Get the verb from list
                     var verb = DeepVerb.GetVerb(match.out("text"));
                     if (verb) {
+                        // Get args
                         var args = [];
-                        var nounMatch = match.match("#Noun?").out("array");
+                        var nounMatch = match.match("#Noun?").trim().out("array");
                         for (var j in nounMatch) {
                             var thing = Thing.GetThing(nounMatch[j]);
                             if (!thing) {
                                 Dooku.IO.Append(
-                                    `<p> I don't know what you mean '${nounMatch[j]}'</p>`
+                                    `<p> I don't know what you mean by '${nounMatch[j]}'</p>`
                                 )
                                 return;
                             }
                             args.push(thing);
                         }
-                        verb.Action(Actor.Me(), ...args);
+                        // Check preposition
+                        var preposition = match.match("#Preposition");
+                        var hasPreposition = preposition.length > 0;
+
+                        // Execute verb after checks
+                        let result = true;
+                        result = verb.CheckAction(Actor.Me(), ...args);
+
+                        if (Actor.Me() && result)
+                            if (Actor.Me().Location)
+                                result = Actor.Me().Location.CheckVerb(verb, args);
+
+                        if (result) {
+                            if (hasPreposition) {
+                                // Execute verb depending on its preposition
+                                // TODO: Currently only executes the first preposition (NOT A PROBLEM RIGHT?)
+                                var preStr = preposition.term(0).trim().out("text");
+                                var preStr = preStr.charAt(0).toUpperCase() + preStr.slice(1);
+                                result = verb[preStr + "CheckAction"](Actor.Me(), ...args);
+                                if (result) 
+                                    verb[preStr + "Action"](Actor.Me(), ...args);
+                                return;
+                            }
+
+                            // Default just execute its action
+                            verb.Action(Actor.Me(), ...args);
+                        }
                     }
                 }
             }
@@ -220,39 +247,9 @@ class Thing {
         this.Contents = [];
         this.Behaviours = [];
         this.Location = null;
-        this.Islisted = true;
-        this.IsReachable = true;
+        this.Listed = true;
+        this.Reachable = true;
         this.Events = {};
-        this.MoveInto = (thing) => {
-            // var loc = this.Location;
-            // while (loc) {
-            //     loc.grab(this);
-            //     loc = loc.Location;
-            // }
-
-            if (this.Location) {
-                this.Location.Contents = this.Location.Contents.filter(item => item !== this)
-            }
-            this.Location = thing;
-            if (thing) {
-                thing.Contents.push(this);
-            }
-
-            return (null);
-        }
-        this.IsReachable = (thing) => {
-            if (!thing.Location)
-                return false;
-            if (!this.Location)
-                return false;
-            if (!this.IsReachable)
-                return false;
-
-            if (thing.Location === this.Location || thing.Location === this)
-                return true;
-
-            return false;
-        }
 
         Thing.List.push(this);
     }
@@ -273,11 +270,41 @@ class Thing {
         return this.Description;
     }
 
+    MoveInto(thing) {
+        // var loc = this.Location;
+        // while (loc) {
+        //     loc.grab(this);
+        //     loc = loc.Location;
+        // }
+
+        if (this.Location) {
+            this.Location.Contents = this.Location.Contents.filter(item => item !== this)
+        }
+        this.Location = thing;
+        if (thing) {
+            thing.Contents.push(this);
+        }
+
+        return (null);
+    }
+
+    // Checks if this thing is in obj
     IsIn(obj) {
         var loc = this.Location;
         if (loc) {
             return loc === obj;
         }
+    }
+
+    // Checks if this thing is reachable from obj
+    IsReachable(obj) {
+        if (!obj.Location || !this.Location || !this.Reachable)
+            return false;
+
+        if (obj.Location === this.Location || this.Location === obj || obj.Location === this)
+            return true;
+
+        return false;
     }
 
     // Checks if a behaviour is the right type before pushing
@@ -362,7 +389,7 @@ class Room extends Thing {
         }
         // Check verb before calling the action
         // This is to ensure that some verbs are not allowed in some rooms
-        this.CheckVerb = (vocab, out) => {
+        this.CheckVerb = (verb, ...args) => {
             return true;
         }
 
@@ -455,7 +482,11 @@ Actor.List = []
 
 class DeepVerb {
     constructor() {
-        this.Action = (actor, out) => {};
+        // Checks if an action can be passed before calling it
+        this.CheckAction = function (actor, ...args) {
+            return true;
+        };
+        this.Action = function (actor, ...args) {};
         this.Verb = [];
 
         DeepVerb.List.push(this);

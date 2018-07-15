@@ -61,8 +61,8 @@ Cloakroom.East = () => {
 const Hook = new Item();
 Hook.Name = "small brass hook";
 Hook.Noun = ["hook"];
-Hook.Description = () => {
-    return `It's just a small brass hook, ${Cloak.IsIn(Hook) ? `with a cloak hanging on it. ` : `screwed to the wall. `}`;
+Hook.Description = function() {
+    return `It's just a small brass hook, ${Cloak.IsIn(this) ? `with a cloak hanging on it. ` : `screwed to the wall. `}`;
 }
 Hook.AddBehaviour(new FixedItem());
 Hook.MoveInto(Cloakroom);
@@ -70,8 +70,22 @@ Hook.MoveInto(Cloakroom);
 const Bar = new Room();
 Bar.Name = "Foyer Bar";
 Bar.Description = "The bar, much rougher than you'd have guessed after the opulence of the foyer to the north, is completely empty. There seems to be some sort of message scrawled in the sawdust on the floor."
-Bar.CheckVerb = (vocab, out) => {
-
+Bar.CheckVerb = function (verb, ...args) {
+    if (!this.GetBehaviour("LitRoom").IsLit()) {
+        if (verb instanceof TravelVerb) {
+            if (verb != NorthVerb) {
+                Dooku.IO.Append(
+                    `<p>Blundering around in the dark isn't a good idea!</p>`
+                )
+                return false;
+            }
+        } else if (!(verb instanceof SysVerb)) {
+            Dooku.IO.Append(
+                `<p>In the dark? You could easily disturb something!</p>`
+            )
+            return false;
+        }
+    }
     return true;
 }
 Bar.North = () => {
@@ -87,6 +101,19 @@ Bar.AddBehaviour(new LitRoom()).LightsOn = () => {
 // TestLamp.Description = "Just a test lamp"
 // TestLamp.AddBehaviour(new LightSource()).TurnOn();
 // TestLamp.MoveInto(Bar);
+
+const TestBall = new Item();
+TestBall.Name = "Test Ball";
+TestBall.Description = "Just a test ball"
+TestBall.Noun = ["ball"]
+TestBall.MoveInto(Player);
+
+const TestTable = new Item();
+TestTable.Name = "Table";
+TestTable.Description = "Just a table"
+TestTable.Noun = ["table"]
+TestTable.AddBehaviour(new Surface());  // Indicates that items can be put on it
+TestTable.MoveInto(Foyer);
 
 var input = $('#input-container');
 var output = $('#output-container');
