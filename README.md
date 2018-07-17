@@ -1,45 +1,82 @@
-# electron-quick-start
+# Dooku
 
-**Clone and run for a quick way to see Electron in action.**
+Dooku is an interactive fiction constructing engine written in JavaScript (Utilizes Electron, BootStrap and JQuery). It uses [CompromiseJS](https://github.com/spencermountain/compromise) to match user inputs to a verb (Very much spaghetti code). 
+All you need is Dooku and DookuSTD. Please see below for a "getting started".
 
-This is a minimal Electron application based on the [Quick Start Guide](https://electronjs.org/docs/tutorial/quick-start) within the Electron documentation.
+**Clone and run using Electron to see a demo in action**
 
-**Use this app along with the [Electron API Demos](https://electronjs.org/#get-started) app for API code examples to help you get started.**
-
-A basic Electron application needs just these files:
-
-- `package.json` - Points to the app's main file and lists its details and dependencies.
-- `main.js` - Starts the app and creates a browser window to render HTML. This is the app's **main process**.
-- `index.html` - A web page to render. This is the app's **renderer process**.
-
-You can learn more about each of these components within the [Quick Start Guide](https://electronjs.org/docs/tutorial/quick-start).
-
-## To Use
-
-To clone and run this repository you'll need [Git](https://git-scm.com) and [Node.js](https://nodejs.org/en/download/) (which comes with [npm](http://npmjs.com)) installed on your computer. From your command line:
+The demo game is Cloak of Darkness, the interactive fiction equivalent of "Hello, world!".
 
 ```bash
 # Clone this repository
-git clone https://github.com/electron/electron-quick-start
+git clone https://github.com/Yuuyuuei/Dooku
 # Go into the repository
-cd electron-quick-start
+cd Dooku
 # Install dependencies
 npm install
 # Run the app
 npm start
 ```
 
-Note: If you're using Linux Bash for Windows, [see this guide](https://www.howtogeek.com/261575/how-to-run-graphical-linux-desktop-applications-from-windows-10s-bash-shell/) or use `node` from the command prompt.
+## Getting Started
 
-## Resources for Learning Electron
+You simple need Dooku.js and DookuSTD.js before your own script.
 
-- [electronjs.org/docs](https://electronjs.org/docs) - all of Electron's documentation
-- [electronjs.org/community#boilerplates](https://electronjs.org/community#boilerplates) - sample starter apps created by the community
-- [electron/electron-quick-start](https://github.com/electron/electron-quick-start) - a very basic starter Electron app
-- [electron/simple-samples](https://github.com/electron/simple-samples) - small applications with ideas for taking them further
-- [electron/electron-api-demos](https://github.com/electron/electron-api-demos) - an Electron app that teaches you how to use Electron
-- [hokein/electron-sample-apps](https://github.com/hokein/electron-sample-apps) - small demo apps for the various Electron APIs
+```bash
+# Include Dooku libraries (and JQuery before)
+<script
+  src="https://code.jquery.com/jquery-3.3.1.min.js"
+  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+  crossorigin="anonymous"></script>
+<script type="text/javascript" src="Dooku.js"></script>
+<script type="text/javascript" src="DookuSTD.js"></script>
+<script type="text/javascript" src="YOUR-SCRIPT.js"></script>
+
+# Set up and output container and an input field
+<div id="output-container"></div>
+<form id="input-container">
+    <input type="text">
+</form>
+
+# In your own JavaScript
+var input = $('#input-container');
+var output = $('#output-container');
+Dooku.IO.Attach(input, output);     # Attach input and output to Dooku
+
+# Begin the game
+GameInfo.Name = "Game Name"
+GameInfo.Description = "A sample game";
+GameInfo.Intro = "Something happened that lead up to this sample game..."
+GameInfo.Author = "You";
+GameInfo.AuthorEmail = "you@yourdomain.com";
+GameInfo.Version = "1.0.0";
+
+const Player = new Actor();
+Player.Name = "You";
+Player.Noun = ["me", "you", "myself"];
+Player.ADescription = "yourself";
+Player.TheDescription = "yourself";
+Player.Description = "You look the same as always. ";
+
+const FirstRoom = new Room();
+FirstRoom.Name = "FirstRoom";
+FirstRoom.Description = "Its a big room for a first room..."
+
+Dooku.Start(() => {
+    // Possess the player
+    Actor.Possess(Player);
+
+    // Move it into our starting room
+    Player.MoveInto(FirstRoom);
+
+    GameInfo.Show();
+});
+```
+
+## What can you do with Dooku?
+
+Dooku is still under-construction and I'm adding more and more to it as I go along. Please check the source at Cloak.js.
 
 ## License
 
-[CC0 1.0 (Public Domain)](LICENSE.md)
+[MIT](LICENSE.md)
