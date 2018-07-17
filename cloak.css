@@ -23,12 +23,9 @@ html {
 body {
   font-family: "Myriad Pro", sans-serif;
   overflow: hidden;
-  background-color: #242220;
-  background: url("./images/background.jpg");
-  background-repeat: no-repeat;
-  background-size: cover;
+  background-color: #fff;
   height: 100%;
-  color: #505050;
+  color: #000;
 }
 
 /*
@@ -151,7 +148,6 @@ button:focus {
 
 #output-container h1 {
   font-size: 48px;
-  color: #98783f;
   line-height: 1.0;
   text-align: center;
   width: 100%;
@@ -161,7 +157,6 @@ button:focus {
 
 #output-container h2 {
   font-size: 36px;
-  color: #98783f;
   line-height: 1.0;
   text-align: center;
   width: 100%;
@@ -171,7 +166,6 @@ button:focus {
 
 #output-container h3 {
   font-size: 30px;
-  color: #98783f;
   line-height: 1.0;
   text-align: center;
   width: 100%;
@@ -181,7 +175,6 @@ button:focus {
 
 #output-container h4 {
   font-size: 24px;
-  color: #98783f;
   line-height: 1.0;
   text-align: center;
   width: 100%;
@@ -191,7 +184,6 @@ button:focus {
 
 #output-container h5 {
   font-size: 16px;
-  color: #98783f;
   line-height: 1.0;
   text-align: center;
   width: 100%;
@@ -201,11 +193,11 @@ button:focus {
 
 #output-container h5 {
   text-align: left;
+  font-weight: bold;
 }
 
 #output-container blockquote {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.3);
   line-height: 1.0;
   text-align: center;
   width: 100%;
@@ -215,27 +207,23 @@ button:focus {
 
 #output-container p {
   font-size: 16px;
-  color: #505050;
   line-height: 1.2;
   text-align: left;
 }
 
 #output-container box {
   border-width: 1px;
-  border-color: #98783f;
+  border-color: #000;
   border-style: solid;
-  background-color: #1a1a1a;
   margin: 5px 0 5px 0;
   padding: 10px;
   width: 100%;
   display: block;
-  color: #ba8a40;
 }
 
 #output-container box p {
   margin: 0;
   padding: 0;
-  color: #ba8a40;
 }
 
 #output-container progress {
@@ -251,46 +239,33 @@ button:focus {
 #output-container progress::-webkit-progress-bar {
   background-color: #161616;
   border-width: 1px;
-  border-color: #98783f;
+  border-color: #fff;
   border-style: solid;
-  -webkit-box-shadow: 2.121px 2.121px 1px 0px rgba(0, 0, 0, 0.35);
-          box-shadow: 2.121px 2.121px 1px 0px rgba(0, 0, 0, 0.35);
   padding: 2px;
 }
 
 #output-container progress::-webkit-progress-value {
-  background: #ba8a40;
+  background: #fff;
   border-radius: 0px;
-  -webkit-box-shadow: inset 0 0 3px rgba(255, 255, 255, 0.5);
-          box-shadow: inset 0 0 3px rgba(255, 255, 255, 0.5);
 }
 
 #output-container button {
   display: block;
   width: 70%;
   border-width: 1px;
-  border-color: #98783f;
+  border-color: #000;
   border-style: solid;
-  background-color: #161616;
   margin: 5px auto;
   padding: 5px;
-  color: #ba8a40;
   border-radius: 0;
   overflow: hidden;
   white-space: normal;
   cursor: pointer;
-  -webkit-transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,-webkit-box-shadow .15s ease-in-out;
-  transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,-webkit-box-shadow .15s ease-in-out;
-  transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
-  transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out,-webkit-box-shadow .15s ease-in-out;
-}
-
-#output-container button:hover {
-  background-color: #1e1e1e;
 }
 
 #output-container button:active {
   background: #0f0f0f;
+  color: #fff;
 }
 
 #input-container {
@@ -311,34 +286,27 @@ button:focus {
 
 #input-container input {
   border-width: 1px;
-  border-color: #98783f;
+  border-color: #000;
   border-style: solid;
-  background-color: #161616;
-  color: #ba8a40;
   -webkit-transition: all 0.1s ease-in-out;
   transition: all 0.1s ease-in-out;
+  color: #000;
 }
 
 #input-container input:focus {
   outline-width: 0;
-  background: #1e1e1e;
 }
 
 #input-container button {
   border-radius: 0;
   border-width: 1px;
-  border-color: #98783f;
+  border-color: #000;
   border-style: solid;
-  background-color: #161616;
-  color: #ba8a40;
-}
-
-#input-container button:hover {
-  background: #1e1e1e;
 }
 
 #input-container button:active {
   background: #0f0f0f;
+  color: #fff;
 }
 
 ::-webkit-scrollbar {
@@ -354,10 +322,6 @@ button:focus {
 
 ::-webkit-scrollbar-thumb {
   background: #202020;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #98783f;
 }
 
 ::-moz-selection {
@@ -530,4 +494,4 @@ button:focus {
     page-break-after: avoid;
   }
 }
-/*# sourceMappingURL=main.css.map */
+/*# sourceMappingURL=cloak.css.map */

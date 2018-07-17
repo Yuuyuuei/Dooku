@@ -1,3 +1,4 @@
-TODO: General DROP check that works on both Drop and DropOn
 TODO: Verbs: Wear, Unwear, Take, Inventory, Search
 TODO: OnAction callbacks
+TODO: Daemon for turn count etc..
+TODO: Preparse verbs and things into sentences

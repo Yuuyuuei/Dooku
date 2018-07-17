@@ -32,7 +32,7 @@ const GameInfo = {
             `<h1> ${this.Name ? this.Name : ""} </h1>`,
             `<blockquote> ${this.Description ? this.Description : ""} </blockquote>`,
             `<blockquote> By ${this.Author ? this.Author : ""} <blockquote> (${this.AuthorEmail ? this.AuthorEmail : ""}) </blockquote></blockquote>`,
-            `<p>${this.Intro ? this.Intro : ""}</p>`
+            `${this.Intro ? this.Intro : ""}`
         )
     }
 }
@@ -64,24 +64,29 @@ const Dooku = {
         },
         Append: function (...elements) { // Backend function to append to the output
             // Prepend output before appending
-            var filteredElements = this.Prepend(elements);
-            for (var i of filteredElements) {
-                this.Output.append(i);
-            }
-        },
-        Prepend: function (...elements) { // Prepend the output before appending it
             var filteredElements = [];
-            for (var i of elements) {
-                if (!i instanceof String) continue; // Only append strings
-
-                // Filter
-
-                filteredElements.push(i);
+            for (var element of elements) {
+                if (element)
+                    filteredElements.push(this.Prepend(element));
             }
-            return filteredElements;
+
+            for (var fElements of filteredElements) {
+                if (fElements) {
+                    this.Output.append(fElements);
+                }
+            }
+
+            this.Output.scrollTop(this.Output[0].scrollHeight);
+        },
+        Prepend: function (element) { // Prepend the output before appending it
+            // Append <p> element if it is just a simple string
+            if (!/<[a-z][\s\S]*>/i.test(element))
+                element = "<p>" + element + "</p>"
+
+            return element;
         },
         // Very simple parser
-        Parse: function (value) {
+        Parse: (value) => {
             // split ands
             var arrValue = value.split("and");
             for (var i in arrValue) {
@@ -92,6 +97,12 @@ const Dooku = {
                     // Get the verb from list
                     var verb = DeepVerb.GetVerb(match.out("text"));
                     if (verb) {
+                        if (Dooku.Started === false) {
+                            // Allow system verbs if game hasn't started yet
+                            if (!(verb instanceof SysVerb)) {
+                                return;
+                            }
+                        }
                         // Get args
                         var args = [];
                         var nounMatch = match.match("#Noun?").trim().out("array");
@@ -99,7 +110,7 @@ const Dooku = {
                             var thing = Thing.GetThing(nounMatch[j]);
                             if (!thing) {
                                 Dooku.IO.Append(
-                                    `<p> I don't know what you mean by '${nounMatch[j]}'</p>`
+                                    ` I don't know what you mean by '${nounMatch[j]}'`
                                 )
                                 return;
                             }
@@ -124,7 +135,7 @@ const Dooku = {
                                 var preStr = preposition.term(0).trim().out("text");
                                 var preStr = preStr.charAt(0).toUpperCase() + preStr.slice(1);
                                 result = verb[preStr + "CheckAction"](Actor.Me(), ...args);
-                                if (result) 
+                                if (result)
                                     verb[preStr + "Action"](Actor.Me(), ...args);
                                 return;
                             }
@@ -199,6 +210,16 @@ const Dooku = {
 
         // Game has started
         this.Started = true;
+    },
+    Quit: function (quitMain) {
+        // TODO: Do some clean up here etc....
+
+        // User quit
+        quitMain();
+
+        // Quit the game
+
+        this.Started = false;
     }
 }
 
@@ -252,22 +273,6 @@ class Thing {
         this.Events = {};
 
         Thing.List.push(this);
-    }
-
-    GetName() {
-        if (typeof this.Name === "function") {
-            return this.Name();
-        }
-
-        return this.Name;
-    }
-
-    GetDescription() {
-        if (typeof this.Description === "function") {
-            return this.Description();
-        }
-
-        return this.Description;
     }
 
     MoveInto(thing) {
@@ -397,9 +402,11 @@ class Room extends Thing {
     }
 
     SayLook() {
+        var name = typeof this.Name === "function" ? this.Name() : this.Name;
+        var description = typeof this.Description === "function" ? this.Description() : this.Description;
         Dooku.IO.Append(
-            `<h5>${this.GetName()}</h5>`,
-            `<p>${this.GetDescription()}</p>`
+            "<h5>" + name + "</h5>",
+            description
         )
     }
 }
@@ -419,10 +426,11 @@ class Actor extends Thing {
 
     TravelTo(room) {
         if (!this.Location) return;
+
         if (!room) {
             if (this == Actor.Me()) {
                 Dooku.IO.Append(
-                    `<p>You can't go that way.</p>`
+                    `You can't go that way.`
                 )
             }
             return;
@@ -430,13 +438,12 @@ class Actor extends Thing {
 
         if (typeof room === "string" || room instanceof String) {
             // Show the string if it is the player character
-            if (this == Actor.Me()) {
-                Dooku.IO.Append(
-                    `<p>${room}</p>`
-                )
+            if (this === Actor.Me()) {
+                Dooku.IO.Append(room)
             }
             return;
         }
+
 
         if (Actor.Me())
             if (Actor.Me().Location)
@@ -487,6 +494,9 @@ class DeepVerb {
             return true;
         };
         this.Action = function (actor, ...args) {};
+        this.OnAction = function (actor, ...args) {};
+        this.ToAction = function (actor, ...args) {};
+        this.InAction = function (actor, ...args) {};
         this.Verb = [];
 
         DeepVerb.List.push(this);
