@@ -23,11 +23,12 @@ npm start
 You simple need Dooku.js and DookuSTD.js before your own script.
 
 ```bash
-# Include Dooku libraries (and JQuery before)
+# Include Dooku libraries (and JQuery and CompromiseJS)
 <script
   src="https://code.jquery.com/jquery-3.3.1.min.js"
   integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
   crossorigin="anonymous"></script>
+<script src="https://unpkg.com/compromise@latest/builds/compromise.min.js"></script>
 <script type="text/javascript" src="Dooku.js"></script>
 <script type="text/javascript" src="DookuSTD.js"></script>
 <script type="text/javascript" src="YOUR-SCRIPT.js"></script>
