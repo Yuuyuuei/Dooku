@@ -4,6 +4,7 @@ Dooku is an interactive fiction constructing engine written in JavaScript (Utili
 All you need is Dooku and DookuSTD. Please see below for a "getting started".
 
 **Clone and run using Electron to see a demo in action**
+Live Demo: [Demo](https://yuuyuuei.github.io/Dooku/)
 
 The demo game is Cloak of Darkness, the interactive fiction equivalent of "Hello, world!".
 
