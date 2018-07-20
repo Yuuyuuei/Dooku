@@ -122,8 +122,10 @@ class Wearable extends DookuBehaviour {
 
         this.AlreadyWearingMessage = `You are already wearing it`;
         this.NotWearingMessage = `You are not wearing that`;
-        this.WearMessage = `You are now wearing it`
-        this.UnwearMessage = `You are not wearing it anymore`
+        this.WearMessage = `You are now wearing it`;
+        this.UnwearMessage = `You are not wearing it anymore`;
+        this.TakeOffOnDropTrigger = null;
+        this.TakeOffOnPutTrigger = null;
 
         this.Wear = (actor) => {
             if (this.IsWorn && this.Thing.IsIn(actor)) {
@@ -183,8 +185,9 @@ class Wearable extends DookuBehaviour {
                 this.IsWorn = false;
             }
         }
-        EventManager.On("OnDrop", Thing, takeOffFirst);
-        EventManager.On("OnPut", Thing, takeOffFirst);
+
+        this.TakeOffOnDropTrigger = new Trigger(this.Thing, "OnDrop", takeOffFirst);
+        this.TakeOffOnPutTrigger = new Trigger(this.Thing, "OnPut", takeOffFirst);
     }
 }
 
@@ -285,7 +288,7 @@ Object.assign(Item.prototype, {
             return;
         }
         if (this.CheckDrop(actor)) {
-            this.Trigger("OnDrop", this);
+            Trigger.Trigger(this, "OnDrop", actor);
             this.MoveInto(actor.Location);
             Dooku.IO.Append(
                 ` ${this.DroppedMessage} `
@@ -362,7 +365,7 @@ Object.assign(Item.prototype, {
             return;
         }
         if (this.CheckPut(actor)) {
-            this.Trigger("OnPut", this, onThing);
+            Trigger.Trigger(this, "OnPut", actor, onThing);
             this.MoveInto(onThing);
             if (actor === Actor.Me()) {
                 Dooku.IO.Append(

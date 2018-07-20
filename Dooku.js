@@ -229,23 +229,88 @@ const Dooku = {
     }
 }
 
-// Handles events between objects
-const EventManager = {
-    On(eventName, binding, handle) {
-        if (!binding.Events) binding.Events = [];
-        if (!binding.Events[eventName]) {
-            binding.Events[eventName] = [];
+// Base abstract class for event
+class Event {
+    constructor(binding, handle) {
+        this.Binding = binding;
+        this.Handle = handle;
+
+        Event.List.push(this);
+    }
+
+    // Triggers this event
+    Trigger(...args) {
+        this.Handle.apply(this.Binding, args);
+    }
+}
+Event.List = [];
+
+
+// Trigger is an event that can be triggered by the user through an associated key
+class Trigger extends Event {
+    constructor(binding, key, handle) {
+        super(binding, handle);
+
+        if (!Trigger.List[key]) {
+            Trigger.List[key] = [];
         }
-        binding.Events[eventName].push(handle);
-    },
-    Trigger(eventName, binding, ...args) {
-        // Return if no event named
-        if (!binding.Events[eventName]) {
-            return;
+        Trigger.List[key].push(this);
+    }
+    static On(binding, key, handle) {
+        return new Trigger(binding, key, handle);
+    }
+    static Trigger(binding, key, ...args) {
+        let trig = Trigger.GetTrigger(binding, key);
+        if (!trig) {
+            return false;
         }
 
         // Call all the handlers
-        binding.Events[eventName].forEach(handle => handle.apply(this, args));
+        trig.forEach(t => {
+            t.Handle.apply(trig.Binding, args);
+        });
+        return true;
+    }
+    static HasTrigger(binding, key) {
+        return Trigger.List[key].some(trig => (trig.Binding === binding));
+    }
+    static GetTrigger(binding, key) {
+        return Trigger.List[key].filter(trig => (trig.Binding === binding));
+    }
+}
+Trigger.List = [];
+
+// Fuse is an event that triggers after a set amount of turns
+class Fuse extends Event {
+    constructor(binding, interval, handle) {
+        super(binding, handle);
+        this.Interval = interval;
+    }
+
+    // Triggers this event only when the interval allows
+    Trigger(...args) {
+        if (this.Interval <= 0) {
+            this.Handle.apply(this.Binding, args);
+        }
+    }
+}
+
+// Daemon is an event that triggers every interval
+class Daemon extends Event {
+    constructor(binding, interval, handle) {
+        super(binding, handle);
+        this.Interval = interval;
+        this.TotalInterval = interval;
+    }
+
+    // Triggers this event only when the interval allows
+    Trigger(...args) {
+        if (this.Interval <= 0) {
+            this.Handle.apply(this.Binding, args);
+
+            // Reset its interval
+            this.Interval = this.TotalInterval;
+        }
     }
 }
 

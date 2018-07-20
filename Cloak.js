@@ -42,7 +42,7 @@ Cloak.CheckDrop = function (actor) {
 
     return true;
 }
-EventManager.On("OnPut", Cloak, function (actor, onThing) {
+const PutCloakOnHookTrigger = new Trigger(Cloak, "OnPut", function (actor, onThing) {
     if (onThing === Hook) {
         Global.Score += 1;
     }
