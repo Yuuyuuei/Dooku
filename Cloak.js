@@ -139,7 +139,7 @@ function EndGame(won) {
         Dooku.IO.Append(`*** You have lost ***`);
     }
     Dooku.Quit(() => {
-        Dooku.IO.Append(`In a total of 4 turns, you have achieved a score of ${Global.Score} points out of a possible ${Global.MaxScore} .`);
+        Dooku.IO.Append(`In a total of ${Global.TurnsPassed} turns, you have achieved a score of ${Global.Score} points out of a possible ${Global.MaxScore} .`);
     })
 }
 

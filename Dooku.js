@@ -98,11 +98,12 @@ const Dooku = {
                     var verb = DeepVerb.GetVerb(match.out("text"));
                     if (verb) {
                         if (Dooku.Started === false) {
-                            // Allow system verbs if game hasn't started yet
+                            // Allow system verbs even if game hasn't started yet
                             if (!(verb instanceof SysVerb)) {
                                 return;
                             }
                         }
+
                         // Get args
                         var args = [];
                         var nounMatch = match.match("#Noun?").trim().out("array");
@@ -142,6 +143,11 @@ const Dooku = {
 
                             // Default just execute its action
                             verb.Action(Actor.Me(), ...args);
+
+                            // Increment turn count if not sysverb
+                            if (!(verb instanceof SysVerb)) {
+                                Global.TurnsPassed += 1;
+                            }
                         }
                     }
                 }
