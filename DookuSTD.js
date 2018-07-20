@@ -183,8 +183,8 @@ class Wearable extends DookuBehaviour {
                 this.IsWorn = false;
             }
         }
-        this.Thing.On("OnDrop", takeOffFirst);
-        this.Thing.On("OnPut", takeOffFirst);
+        EventManager.On("OnDrop", Thing, takeOffFirst);
+        EventManager.On("OnPut", Thing, takeOffFirst);
     }
 }
 

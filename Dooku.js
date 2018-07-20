@@ -229,25 +229,23 @@ const Dooku = {
     }
 }
 
-let eventSystem = {
-    // Used to add events to execude on trigger
-    On(eventName, handle) {
-        if (!this.Events) this.Events = [];
-        if (!this.Events[eventName]) {
-            this.Events[eventName] = [];
+// Handles events between objects
+const EventManager = {
+    On(eventName, binding, handle) {
+        if (!binding.Events) binding.Events = [];
+        if (!binding.Events[eventName]) {
+            binding.Events[eventName] = [];
         }
-        this.Events[eventName].push(handle);
+        binding.Events[eventName].push(handle);
     },
-
-    // Trigger an event with name
-    Trigger(eventName, ...args) {
+    Trigger(eventName, binding, ...args) {
         // Return if no event named
-        if (!this.Events[eventName]) {
+        if (!binding.Events[eventName]) {
             return;
         }
 
         // Call all the handlers
-        this.Events[eventName].forEach(handle => handle.apply(this, args));
+        binding.Events[eventName].forEach(handle => handle.apply(this, args));
     }
 }
 
@@ -262,7 +260,6 @@ class DookuBehaviour {
 
     }
 }
-Object.assign(DookuBehaviour.prototype, eventSystem);
 
 class Thing {
     constructor() {
@@ -276,7 +273,6 @@ class Thing {
         this.Location = null;
         this.Listed = true;
         this.Reachable = true;
-        this.Events = {};
 
         Thing.List.push(this);
     }
@@ -364,7 +360,6 @@ class Thing {
     }
 }
 Thing.List = [];
-Object.assign(Thing.prototype, eventSystem);
 
 class Item extends Thing {
     constructor() {
