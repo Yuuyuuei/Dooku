@@ -245,7 +245,6 @@ class Event {
 }
 Event.List = [];
 
-
 // Trigger is an event that can be triggered by the user through an associated key
 class Trigger extends Event {
     constructor(binding, key, handle) {
