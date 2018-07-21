@@ -86,7 +86,7 @@ const Dooku = {
             return element;
         },
         // Very simple parser
-        Parse: (value) => {
+        Parse: function (value) {
             // split ands
             var arrValue = value.split("and");
             for (var i in arrValue) {
@@ -146,11 +146,18 @@ const Dooku = {
 
                             // Increment turn count if not sysverb
                             if (!(verb instanceof SysVerb)) {
-                                Global.TurnsPassed += 1;
+                                Dooku.IO.NextTurn();
                             }
                         }
                     }
                 }
+            }
+        },
+        NextTurn: function () {
+            // Triggers a next turn
+            // Lower the interval on each fuse
+            for (var ev of DookuEvent.List) {
+                ev.OnTurn();
             }
         }
     },
@@ -229,24 +236,34 @@ const Dooku = {
     }
 }
 
-// Base abstract class for event
-class Event {
+// Base abstract class for DookuEvent
+class DookuEvent {
     constructor(binding, handle) {
         this.Binding = binding;
         this.Handle = handle;
 
-        Event.List.push(this);
+        DookuEvent.List.push(this);
     }
 
-    // Triggers this event
+    // Triggers this DookuEvent
     Trigger(...args) {
+        this.OnTrigger(...args);
+    }
+
+    // Can be used to force a trigger
+    OnTrigger(...args) {
         this.Handle.apply(this.Binding, args);
     }
-}
-Event.List = [];
 
-// Trigger is an event that can be triggered by the user through an associated key
-class Trigger extends Event {
+    // Called on each turn pass
+    OnTurn() {
+
+    }
+}
+DookuEvent.List = [];
+
+// Trigger is an DookuEvent that can be triggered by the user through an associated key
+class Trigger extends DookuEvent {
     constructor(binding, key, handle) {
         super(binding, handle);
 
@@ -279,39 +296,94 @@ class Trigger extends Event {
 }
 Trigger.List = [];
 
-// Fuse is an event that triggers after a set amount of turns
-class Fuse extends Event {
+// Fuse is an DookuEvent that triggers after a set amount of turns
+class Fuse extends DookuEvent {
     constructor(binding, interval, handle) {
         super(binding, handle);
         this.Interval = interval;
+        this.Alive = true;
+
+        Fuse.List.push(this);
     }
 
-    // Triggers this event only when the interval allows
+    // Triggers this DookuEvent only when the interval allows
     Trigger(...args) {
         if (this.Interval <= 0) {
-            this.Handle.apply(this.Binding, args);
+            this.OnTrigger(...args);
+
+            this.Alive = false;
         }
     }
-}
 
-// Daemon is an event that triggers every interval
-class Daemon extends Event {
+    // Reset a fuse at specified interval
+    Reset(interval) {
+        this.Interval = interval;
+        this.Alive = true;
+    }
+
+    // Override on turn to decrease interval
+    OnTurn() {
+        if (this.Alive) {
+            this.Interval -= 1;
+
+            this.Trigger();
+        }
+    }
+
+    // Kill the event from ever happening 
+    Kill() {
+        this.Alive = false;
+    }
+}
+Fuse.List = [];
+
+// Daemon is an DookuEvent that triggers every interval
+class Daemon extends DookuEvent {
     constructor(binding, interval, handle) {
         super(binding, handle);
         this.Interval = interval;
         this.TotalInterval = interval;
+        this.Alive = true;
+
+        Daemon.List.push(this);
     }
 
-    // Triggers this event only when the interval allows
+    // Triggers this DookuEvent only when the interval allows, then reset interval
     Trigger(...args) {
         if (this.Interval <= 0) {
-            this.Handle.apply(this.Binding, args);
+            this.OnTrigger(...args);
 
-            // Reset its interval
-            this.Interval = this.TotalInterval;
+            this.Reset();
         }
     }
+
+    Reset(interval) {
+        // Reset its interval
+        this.Interval = interval || this.TotalInterval;
+
+        this.Alive = true;
+    }
+
+    // Override on turn to decrease interval
+    OnTurn() {
+        if (this.Alive) {
+            this.Interval -= 1;
+
+            this.Trigger();
+        }
+    }
+
+    // Kill the event from ever happening 
+    Kill() {
+        this.Alive = false;
+    }
 }
+Daemon.List = [];
+
+// Daemon to keep track of turns
+const TurnCounter = new Daemon(null, 1, function() {
+    Global.TurnsPassed += 1;
+})
 
 // Every thing can hold an infinite number of components
 class DookuBehaviour {
